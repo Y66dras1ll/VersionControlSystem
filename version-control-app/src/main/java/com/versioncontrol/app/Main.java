@@ -116,12 +116,12 @@ public class Main {
 
         System.out.println("\n--- Список репозиториев ---");
         for (Repository repo : repos.values()) {
-            System.out.println("📁 " + repo);
+            System.out.println("* " + repo);
             if (repo.getFiles().isEmpty()) {
                 System.out.println("   └─ (нет файлов)");
             } else {
                 for (VersionedFile file : repo.getFiles().values()) {
-                    System.out.println("   📄 " + file);
+                    System.out.println("   ** " + file);
                 }
             }
             System.out.println();
@@ -272,7 +272,7 @@ public class Main {
             } else {
                 int versionNumber = 1;
                 for (FileVersion version : file.getAllVersions()) {
-                    System.out.println("🔹 " + version);
+                    System.out.println("| " + version);
                     versionNumber++;
                 }
             }
