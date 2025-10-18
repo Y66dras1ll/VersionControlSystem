@@ -24,7 +24,7 @@ public class FileDiff {
         String[] oldLines = oldContent.split("\n", -1);
         String[] newLines = newContent.split("\n", -1);
 
-        // Используем более точный алгоритм сравнения
+
         int i = 0, j = 0;
         int lineNumber = 1;
 
@@ -33,24 +33,24 @@ public class FileDiff {
             String newLine = j < newLines.length ? newLines[j] : null;
 
             if (oldLine != null && newLine != null && oldLine.equals(newLine)) {
-                // Неизмененная строка - пропускаем
+
                 diff.addLineDiff(new LineDiff(lineNumber, oldLine, newLine, LineDiff.ChangeType.UNCHANGED));
                 i++;
                 j++;
                 lineNumber++;
             } else if (oldLine != null && newLine != null && !oldLine.equals(newLine)) {
-                // Измененная строка
+
                 diff.addLineDiff(new LineDiff(lineNumber, oldLine, newLine, LineDiff.ChangeType.MODIFIED));
                 i++;
                 j++;
                 lineNumber++;
             } else if (oldLine != null && newLine == null) {
-                // Удаленная строка
+
                 diff.addLineDiff(new LineDiff(lineNumber, oldLine, null, LineDiff.ChangeType.REMOVED));
                 i++;
                 lineNumber++;
             } else if (oldLine == null && newLine != null) {
-                // Добавленная строка
+
                 diff.addLineDiff(new LineDiff(lineNumber, null, newLine, LineDiff.ChangeType.ADDED));
                 j++;
                 lineNumber++;

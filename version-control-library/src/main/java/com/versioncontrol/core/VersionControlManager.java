@@ -22,7 +22,7 @@ public class VersionControlManager {
         Repository repository = new Repository(name, repositoryPath);
         repositories.put(name, repository);
 
-        // Автоматически сканируем существующие .txt файлы при создании репозитория
+
         repository.scanExistingTextFiles();
 
         return repository;

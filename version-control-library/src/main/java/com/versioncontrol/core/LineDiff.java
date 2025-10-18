@@ -88,7 +88,7 @@ public class LineDiff {
                 sb.append(String.format("   Удалено: \"%s\"\n", oldLine != null ? oldLine : ""));
                 break;
             default:
-                // UNCHANGED - не выводим
+
                 break;
         }
 

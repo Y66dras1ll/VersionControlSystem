@@ -17,7 +17,7 @@ public class FileVersion {
         this.comment = Objects.requireNonNull(comment, "Комментарий не может быть null");
     }
 
-    // Getters
+
     public String getContent() { return content; }
     public int getVersionNumber() { return versionNumber; }
     public LocalDateTime getTimestamp() { return timestamp; }

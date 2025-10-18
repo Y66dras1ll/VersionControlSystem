@@ -55,7 +55,7 @@ public class Main {
                     deleteRepository();
                     break;
                 case "0":
-                    System.out.println("До свидания!");
+                    System.out.println("Завершение.");
                     return;
                 default:
                     System.out.println("Неверный выбор. Пожалуйста, попробуйте снова.");
@@ -149,7 +149,7 @@ public class Main {
             while (!(line = scanner.nextLine()).equals("КОНЕЦ")) {
                 content.append(line).append("\n");
             }
-            // Убираем последний перенос строки
+
             if (content.length() > 0) {
                 content.setLength(content.length() - 1);
             }
@@ -184,14 +184,14 @@ public class Main {
                 return;
             }
 
-            // Проверяем существование файла
+
             String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
             if (!repo.getFiles().containsKey(normalizedFileName)) {
                 System.out.println("✗ Файл не найден: " + fileName);
                 return;
             }
 
-            // Показываем текущее содержимое и информацию о версиях
+
             VersionedFile file = repo.getFiles().get(normalizedFileName);
             String currentContent = repo.readFile(fileName);
 
@@ -208,7 +208,7 @@ public class Main {
             while (!(line = scanner.nextLine()).equals("КОНЕЦ")) {
                 newContent.append(line).append("\n");
             }
-            // Убираем последний перенос строки
+
             if (newContent.length() > 0) {
                 newContent.setLength(newContent.length() - 1);
             }
@@ -223,7 +223,7 @@ public class Main {
             repo.updateFile(fileName, newContent.toString(), comment);
             System.out.println("✓ Файл успешно обновлен. Создана новая версия.");
 
-            // Предлагаем посмотреть различия
+
             System.out.print("Показать различия с предыдущей версией? (да/нет): ");
             String showDiff = scanner.nextLine().trim().toLowerCase();
             if (showDiff.equals("да") || showDiff.equals("д")) {
@@ -332,7 +332,7 @@ public class Main {
                 return;
             }
 
-            // Проверяем существование файла
+
             String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
             if (!repo.getFiles().containsKey(normalizedFileName)) {
                 System.out.println("✗ Файл не найден: " + fileName);
@@ -349,7 +349,7 @@ public class Main {
 
             System.out.println("Доступные версии: от 1 до " + versionCount);
 
-            // Получаем старую версию
+
             System.out.print("Введите номер СТАРОЙ версии: ");
             int oldVersion;
             try {
@@ -359,7 +359,7 @@ public class Main {
                 return;
             }
 
-            // Получаем новую версию
+
             System.out.print("Введите номер НОВОЙ версии: ");
             int newVersion;
             try {
@@ -369,7 +369,7 @@ public class Main {
                 return;
             }
 
-            // Проверяем корректность номеров версий
+
             if (oldVersion < 1 || oldVersion > versionCount) {
                 System.out.println("✗ Неверный номер старой версии. Должен быть от 1 до " + versionCount);
                 return;
@@ -385,7 +385,7 @@ public class Main {
                 return;
             }
 
-            // Показываем информацию о сравниваемых версиях
+
             FileVersion oldVer = file.getVersion(oldVersion);
             FileVersion newVer = file.getVersion(newVersion);
 
@@ -419,7 +419,7 @@ public class Main {
                 return;
             }
 
-            // Проверяем существование файла
+
             String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
             if (!repo.getFiles().containsKey(normalizedFileName)) {
                 System.out.println("✗ Файл не найден: " + fileName);
@@ -433,7 +433,7 @@ public class Main {
                 return;
             }
 
-            // Показываем информацию о версиях
+
             FileVersion previousVer = file.getVersion(file.getVersionCount() - 1);
             FileVersion currentVer = file.getLatestVersion();
 
@@ -485,7 +485,7 @@ public class Main {
         }
 
         try {
-            // Подтверждение удаления
+
             System.out.print("Вы уверены, что хотите удалить репозиторий '" + name + "'? (да/нет): ");
             String confirmation = scanner.nextLine().trim().toLowerCase();
 

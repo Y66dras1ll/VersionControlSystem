@@ -45,7 +45,7 @@ public class VersionedFile {
     }
 
     public FileDiff compareVersions(int version1, int version2) {
-        // Проверяем корректность номеров версий
+
         if (version1 < 1 || version1 > versions.size()) {
             throw new IllegalArgumentException("Неверный номер первой версии: " + version1);
         }
@@ -56,7 +56,7 @@ public class VersionedFile {
         FileVersion v1 = getVersion(version1);
         FileVersion v2 = getVersion(version2);
 
-        // ВАЖНО: сравниваем version1 с version2, где version1 - старая версия, version2 - новая
+
         return FileDiff.compare(v1.getContent(), v2.getContent());
     }
 
@@ -66,8 +66,8 @@ public class VersionedFile {
         }
 
         // Сравниваем предыдущую версию с текущей
-        FileVersion previous = getVersion(versions.size() - 1); // предыдущая версия
-        FileVersion current = getVersion(versions.size());     // текущая версия
+        FileVersion previous = getVersion(versions.size() - 1);
+        FileVersion current = getVersion(versions.size());
 
         return FileDiff.compare(previous.getContent(), current.getContent());
     }

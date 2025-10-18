@@ -172,7 +172,7 @@ public class Repository {
 
                             VersionedFile versionedFile = files.computeIfAbsent(fileName, VersionedFile::new);
 
-                            // Если файл существует на диске но не в памяти, добавляем его как версию 1
+
                             if (versionedFile.getVersionCount() == 0) {
                                 versionedFile.addVersion(content, "Загружен из существующего файла");
                                 saveVersionToArchive(fileName, 1, content, "Загружен из существующего файла");
@@ -186,7 +186,7 @@ public class Repository {
         }
     }
 
-    // Getters
+
     public String getName() { return name; }
     public Path getRepositoryPath() { return repositoryPath; }
     public Path getVersionsPath() { return versionsPath; }
