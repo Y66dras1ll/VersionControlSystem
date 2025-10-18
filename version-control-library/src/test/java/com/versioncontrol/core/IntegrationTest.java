@@ -68,4 +68,27 @@ class IntegrationTest {
         assertTrue(diffString.contains("Слово 3: \"12312\" -> \"12123\""));
         assertTrue(diffString.contains("удалено \"12312\""));
     }
+
+    @Test
+    void testMultipleFilesInRepository() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-multi-test");
+        Repository repo = new Repository("multi-test", tempDir.toString());
+
+        // Добавляем несколько файлов
+        repo.addFile("file1", "содержимое file1", "версия 1 file1");
+        repo.addFile("file2", "содержимое file2", "версия 1 file2");
+        repo.addFile("file3", "содержимое file3", "версия 1 file3");
+
+        assertEquals(3, repo.getFiles().size());
+        assertTrue(repo.getFiles().containsKey("file1.txt"));
+        assertTrue(repo.getFiles().containsKey("file2.txt"));
+        assertTrue(repo.getFiles().containsKey("file3.txt"));
+
+        // Обновляем один из файлов
+        repo.updateFile("file2", "обновленное содержимое file2", "версия 2 file2");
+
+        assertEquals(2, repo.getFiles().get("file2.txt").getVersionCount());
+        assertEquals(1, repo.getFiles().get("file1.txt").getVersionCount());
+        assertEquals(1, repo.getFiles().get("file3.txt").getVersionCount());
+    }
 }

@@ -55,15 +55,21 @@ public class VersionedFile {
 
         FileVersion v1 = getVersion(version1);
         FileVersion v2 = getVersion(version2);
-        return v1.compareWith(v2);
+
+        // ВАЖНО: сравниваем version1 с version2, где version1 - старая версия, version2 - новая
+        return FileDiff.compare(v1.getContent(), v2.getContent());
     }
 
     public FileDiff compareWithPrevious() {
         if (versions.size() < 2) {
             throw new IllegalStateException("Нет предыдущей версии для сравнения");
         }
-        // Сравниваем последнюю версию с предыдущей
-        return compareVersions(versions.size(), versions.size() - 1);
+
+        // Сравниваем предыдущую версию с текущей
+        FileVersion previous = getVersion(versions.size() - 1); // предыдущая версия
+        FileVersion current = getVersion(versions.size());     // текущая версия
+
+        return FileDiff.compare(previous.getContent(), current.getContent());
     }
 
     public String getFileName() { return fileName; }

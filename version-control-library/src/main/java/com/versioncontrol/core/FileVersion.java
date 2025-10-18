@@ -23,10 +23,6 @@ public class FileVersion {
     public LocalDateTime getTimestamp() { return timestamp; }
     public String getComment() { return comment; }
 
-    public FileDiff compareWith(FileVersion other) {
-        return FileDiff.compare(this.content, other.content);
-    }
-
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");

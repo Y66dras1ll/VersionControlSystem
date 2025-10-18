@@ -40,6 +40,19 @@ class RepositoryTest {
     }
 
     @Test
+    void testAddFileWithTxtExtension() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        Repository repo = new Repository("test-repo", tempDir.toString());
+
+        repo.addFile("document.txt", "содержимое", "версия 1");
+
+        // Файл должен быть доступен с расширением .txt
+        assertNotNull(repo.getFiles().get("document.txt"));
+        assertEquals("содержимое", repo.readFile("document.txt"));
+        assertEquals("содержимое", repo.readFile("document"));
+    }
+
+    @Test
     void testUpdateFile() throws IOException {
         Path tempDir = Files.createTempDirectory("vcs-test");
         Repository repo = new Repository("test-repo", tempDir.toString());
@@ -49,6 +62,15 @@ class RepositoryTest {
 
         assertEquals("обновленное содержимое", repo.readFile("document"));
         assertEquals(2, repo.getFiles().get("document.txt").getVersionCount());
+    }
+
+    @Test
+    void testUpdateNonExistentFile() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        Repository repo = new Repository("test-repo", tempDir.toString());
+
+        assertThrows(IllegalArgumentException.class, () ->
+                repo.updateFile("nonexistent", "content", "comment"));
     }
 
     @Test
@@ -62,7 +84,27 @@ class RepositoryTest {
         FileDiff diff = repo.compareFileVersions("file", 1, 2);
         assertNotNull(diff);
         assertEquals(1, diff.getLineDiffs().size());
-        assertEquals(LineDiff.ChangeType.MODIFIED, diff.getLineDiffs().get(0).getChangeType());
+
+        LineDiff lineDiff = diff.getLineDiffs().get(0);
+        assertEquals(LineDiff.ChangeType.MODIFIED, lineDiff.getChangeType());
+        assertEquals("строка один", lineDiff.getOldLine());
+        assertEquals("строка два", lineDiff.getNewLine());
+    }
+
+    @Test
+    void testCompareInvalidFileVersions() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        Repository repo = new Repository("test-repo", tempDir.toString());
+
+        repo.addFile("file", "content", "version 1");
+
+        // Тестируем неверные номера версий
+        assertThrows(IllegalArgumentException.class, () ->
+                repo.compareFileVersions("file", 0, 1));
+        assertThrows(IllegalArgumentException.class, () ->
+                repo.compareFileVersions("file", 1, 3));
+        assertThrows(IllegalArgumentException.class, () ->
+                repo.compareFileVersions("file", 2, 1));
     }
 
     @Test
@@ -76,9 +118,21 @@ class RepositoryTest {
         FileDiff diff = repo.compareWithPreviousVersion("file");
         assertNotNull(diff);
 
-        // Должен сравнить версию 2 с версией 1
-        assertEquals("первая версия", diff.getLineDiffs().get(0).getOldLine());
-        assertEquals("вторая версия", diff.getLineDiffs().get(0).getNewLine());
+        // Должен сравнить версию 1 с версией 2
+        LineDiff lineDiff = diff.getLineDiffs().get(0);
+        assertEquals("первая версия", lineDiff.getOldLine());
+        assertEquals("вторая версия", lineDiff.getNewLine());
+    }
+
+    @Test
+    void testCompareWithPreviousVersionNoPrevious() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        Repository repo = new Repository("test-repo", tempDir.toString());
+
+        repo.addFile("file", "content", "version 1");
+
+        assertThrows(IllegalStateException.class, () ->
+                repo.compareWithPreviousVersion("file"));
     }
 
     @Test
@@ -89,6 +143,7 @@ class RepositoryTest {
         assertThrows(IllegalArgumentException.class, () -> repo.readFile("nonexistent"));
         assertThrows(IllegalArgumentException.class, () -> repo.getFileVersion("nonexistent", 1));
         assertThrows(IllegalArgumentException.class, () -> repo.compareFileVersions("nonexistent", 1, 2));
+        assertThrows(IllegalArgumentException.class, () -> repo.compareWithPreviousVersion("nonexistent"));
     }
 
     @Test
@@ -123,5 +178,37 @@ class RepositoryTest {
         assertEquals(1, repo.getFiles().size());
         assertNotNull(repo.getFiles().get("existing.txt"));
         assertNull(repo.getFiles().get("data.dat"));
+    }
+
+    @Test
+    void testGetFileVersion() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        Repository repo = new Repository("test-repo", tempDir.toString());
+
+        repo.addFile("file", "версия 1", "комментарий 1");
+        repo.updateFile("file", "версия 2", "комментарий 2");
+
+        FileVersion v1 = repo.getFileVersion("file", 1);
+        FileVersion v2 = repo.getFileVersion("file", 2);
+
+        assertEquals("версия 1", v1.getContent());
+        assertEquals("версия 2", v2.getContent());
+        assertEquals("комментарий 1", v1.getComment());
+        assertEquals("комментарий 2", v2.getComment());
+    }
+
+    @Test
+    void testToString() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        Repository repo = new Repository("test-repo", tempDir.toString());
+
+        String result = repo.toString();
+        assertTrue(result.contains("Репозиторий: test-repo"));
+        assertTrue(result.contains("0 файлов"));
+
+        repo.addFile("file", "content", "comment");
+
+        String result2 = repo.toString();
+        assertTrue(result2.contains("1 файлов"));
     }
 }

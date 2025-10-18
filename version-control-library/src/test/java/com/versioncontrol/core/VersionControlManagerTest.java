@@ -75,4 +75,30 @@ class VersionControlManagerTest {
         assertEquals(repo1, vcm.getRepository("repo1"));
         assertEquals(repo2, vcm.getRepository("repo2"));
     }
+
+    @Test
+    void testGetRepositories() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        VersionControlManager vcm = new VersionControlManager();
+
+        vcm.createRepository("repo1", tempDir.toString());
+        vcm.createRepository("repo2", tempDir.toString());
+
+        var repos = vcm.getRepositories();
+        assertEquals(2, repos.size());
+        assertTrue(repos.containsKey("repo1"));
+        assertTrue(repos.containsKey("repo2"));
+    }
+
+    @Test
+    void testToString() throws IOException {
+        Path tempDir = Files.createTempDirectory("vcs-test");
+        VersionControlManager vcm = new VersionControlManager();
+
+        vcm.createRepository("repo1", tempDir.toString());
+
+        String result = vcm.toString();
+        assertTrue(result.contains("Менеджер контроля версий"));
+        assertTrue(result.contains("1 репозиториев"));
+    }
 }

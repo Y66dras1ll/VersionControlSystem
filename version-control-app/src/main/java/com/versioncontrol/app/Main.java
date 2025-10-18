@@ -98,11 +98,11 @@ public class Main {
 
         try {
             Repository repo = vcm.createRepository(name, path);
-            System.out.println("Репозиторий создан: " + repo);
-            System.out.println("Папка для версий: " + repo.getVersionsPath());
-            System.out.println("Автоматически просканированы существующие .txt файлы");
+            System.out.println("✓ Репозиторий создан: " + repo);
+            System.out.println("✓ Папка для версий: " + repo.getVersionsPath());
+            System.out.println("✓ Автоматически просканированы существующие .txt файлы");
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -115,15 +115,17 @@ public class Main {
         }
 
         System.out.println("\n--- Список репозиториев ---");
-        repos.values().forEach(repo -> {
-            System.out.println(repo);
+        for (Repository repo : repos.values()) {
+            System.out.println("📁 " + repo);
             if (repo.getFiles().isEmpty()) {
-                System.out.println("  └─ (нет файлов)");
+                System.out.println("   └─ (нет файлов)");
             } else {
-                repo.getFiles().values().forEach(file ->
-                        System.out.println("  └─ " + file));
+                for (VersionedFile file : repo.getFiles().values()) {
+                    System.out.println("   📄 " + file);
+                }
             }
-        });
+            System.out.println();
+        }
     }
 
     private static void addFileToRepository() {
@@ -160,10 +162,10 @@ public class Main {
             }
 
             repo.addFile(fileName, content.toString(), comment);
-            System.out.println("Текстовый файл успешно добавлен.");
+            System.out.println("✓ Текстовый файл успешно добавлен.");
 
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -185,14 +187,20 @@ public class Main {
             // Проверяем существование файла
             String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
             if (!repo.getFiles().containsKey(normalizedFileName)) {
-                System.out.println("Файл не найден: " + fileName);
+                System.out.println("✗ Файл не найден: " + fileName);
                 return;
             }
 
-            // Показываем текущее содержимое
+            // Показываем текущее содержимое и информацию о версиях
+            VersionedFile file = repo.getFiles().get(normalizedFileName);
             String currentContent = repo.readFile(fileName);
+
             System.out.println("\n--- Текущее содержимое файла " + fileName + " ---");
+            System.out.println("Всего версий: " + file.getVersionCount());
+            System.out.println("Текущая версия: " + file.getLatestVersion().getVersionNumber());
+            System.out.println("\nСодержимое:");
             System.out.println(currentContent);
+            System.out.println("----------------------------------------");
 
             System.out.println("\nВведите новое содержимое файла (введите 'КОНЕЦ' на отдельной строке для завершения):");
             StringBuilder newContent = new StringBuilder();
@@ -213,7 +221,7 @@ public class Main {
             }
 
             repo.updateFile(fileName, newContent.toString(), comment);
-            System.out.println("Файл успешно обновлен. Создана новая версия.");
+            System.out.println("✓ Файл успешно обновлен. Создана новая версия.");
 
             // Предлагаем посмотреть различия
             System.out.print("Показать различия с предыдущей версией? (да/нет): ");
@@ -228,7 +236,7 @@ public class Main {
             }
 
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -247,22 +255,30 @@ public class Main {
                 return;
             }
 
-            var file = repo.getFiles().get(fileName.endsWith(".txt") ? fileName : fileName + ".txt");
+            String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
+            VersionedFile file = repo.getFiles().get(normalizedFileName);
+
             if (file == null) {
-                System.out.println("Файл не найден.");
+                System.out.println("✗ Файл не найден: " + fileName);
                 return;
             }
 
             System.out.println("\n--- Версии файла " + file.getFileName() + " ---");
+            System.out.println("Всего версий: " + file.getVersionCount());
+            System.out.println();
+
             if (file.getVersionCount() == 0) {
                 System.out.println("(нет версий)");
             } else {
-                file.getAllVersions().forEach(version ->
-                        System.out.println(version));
+                int versionNumber = 1;
+                for (FileVersion version : file.getAllVersions()) {
+                    System.out.println("🔹 " + version);
+                    versionNumber++;
+                }
             }
 
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -281,12 +297,23 @@ public class Main {
                 return;
             }
 
+            String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
+            if (!repo.getFiles().containsKey(normalizedFileName)) {
+                System.out.println("✗ Файл не найден: " + fileName);
+                return;
+            }
+
+            VersionedFile file = repo.getFiles().get(normalizedFileName);
             String content = repo.readFile(fileName);
+
             System.out.println("\n--- Содержимое файла " + fileName + " ---");
+            System.out.println("Текущая версия: " + file.getLatestVersion().getVersionNumber());
+            System.out.println("Комментарий: " + file.getLatestVersion().getComment());
+            System.out.println("----------------------------------------");
             System.out.println(content);
 
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -308,7 +335,7 @@ public class Main {
             // Проверяем существование файла
             String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
             if (!repo.getFiles().containsKey(normalizedFileName)) {
-                System.out.println("Файл не найден: " + fileName);
+                System.out.println("✗ Файл не найден: " + fileName);
                 return;
             }
 
@@ -316,50 +343,64 @@ public class Main {
             int versionCount = file.getVersionCount();
 
             if (versionCount < 2) {
-                System.out.println("Для сравнения нужно как минимум 2 версии файла. Сейчас версий: " + versionCount);
+                System.out.println("✗ Для сравнения нужно как минимум 2 версии файла. Сейчас версий: " + versionCount);
                 return;
             }
 
             System.out.println("Доступные версии: от 1 до " + versionCount);
-            System.out.print("Введите номер первой версии: ");
-            int version1;
+
+            // Получаем старую версию
+            System.out.print("Введите номер СТАРОЙ версии: ");
+            int oldVersion;
             try {
-                version1 = Integer.parseInt(scanner.nextLine().trim());
+                oldVersion = Integer.parseInt(scanner.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка: введите корректный номер версии (целое число)");
+                System.out.println("✗ Ошибка: введите корректный номер версии (целое число)");
                 return;
             }
 
-            System.out.print("Введите номер второй версии: ");
-            int version2;
+            // Получаем новую версию
+            System.out.print("Введите номер НОВОЙ версии: ");
+            int newVersion;
             try {
-                version2 = Integer.parseInt(scanner.nextLine().trim());
+                newVersion = Integer.parseInt(scanner.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка: введите корректный номер версии (целое число)");
+                System.out.println("✗ Ошибка: введите корректный номер версии (целое число)");
                 return;
             }
 
             // Проверяем корректность номеров версий
-            if (version1 < 1 || version1 > versionCount) {
-                System.out.println("Неверный номер первой версии. Должен быть от 1 до " + versionCount);
+            if (oldVersion < 1 || oldVersion > versionCount) {
+                System.out.println("✗ Неверный номер старой версии. Должен быть от 1 до " + versionCount);
                 return;
             }
 
-            if (version2 < 1 || version2 > versionCount) {
-                System.out.println("Неверный номер второй версии. Должен быть от 1 до " + versionCount);
+            if (newVersion < 1 || newVersion > versionCount) {
+                System.out.println("✗ Неверный номер новой версии. Должен быть от 1 до " + versionCount);
                 return;
             }
 
-            if (version1 == version2) {
-                System.out.println("Версии одинаковые, сравнение не имеет смысла.");
+            if (oldVersion == newVersion) {
+                System.out.println("✗ Версии одинаковые, сравнение не имеет смысла.");
                 return;
             }
 
-            FileDiff diff = repo.compareFileVersions(fileName, version1, version2);
-            System.out.println("\n" + diff.toString());
+            // Показываем информацию о сравниваемых версиях
+            FileVersion oldVer = file.getVersion(oldVersion);
+            FileVersion newVer = file.getVersion(newVersion);
 
+            System.out.println("\n--- Сравнение версий ---");
+            System.out.println("СТАРАЯ версия " + oldVersion + ": " + oldVer.getComment());
+            System.out.println("НОВАЯ версия " + newVersion + ": " + newVer.getComment());
+            System.out.println();
+
+            FileDiff diff = repo.compareFileVersions(fileName, oldVersion, newVersion);
+            System.out.println(diff.toString());
+
+        } catch (NumberFormatException e) {
+            System.out.println("✗ Ошибка: введите корректные номера версий (целые числа)");
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -381,22 +422,31 @@ public class Main {
             // Проверяем существование файла
             String normalizedFileName = fileName.endsWith(".txt") ? fileName : fileName + ".txt";
             if (!repo.getFiles().containsKey(normalizedFileName)) {
-                System.out.println("Файл не найден: " + fileName);
+                System.out.println("✗ Файл не найден: " + fileName);
                 return;
             }
 
             VersionedFile file = repo.getFiles().get(normalizedFileName);
 
             if (file.getVersionCount() < 2) {
-                System.out.println("Для сравнения с предыдущей версией нужно как минимум 2 версии файла. Сейчас версий: " + file.getVersionCount());
+                System.out.println("✗ Для сравнения с предыдущей версией нужно как минимум 2 версии файла. Сейчас версий: " + file.getVersionCount());
                 return;
             }
 
+            // Показываем информацию о версиях
+            FileVersion previousVer = file.getVersion(file.getVersionCount() - 1);
+            FileVersion currentVer = file.getLatestVersion();
+
+            System.out.println("\n--- Сравнение с предыдущей версией ---");
+            System.out.println("ПРЕДЫДУЩАЯ версия " + (file.getVersionCount() - 1) + ": " + previousVer.getComment());
+            System.out.println("ТЕКУЩАЯ версия " + file.getVersionCount() + ": " + currentVer.getComment());
+            System.out.println();
+
             FileDiff diff = repo.compareWithPreviousVersion(fileName);
-            System.out.println("\n" + diff.toString());
+            System.out.println(diff.toString());
 
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -406,10 +456,22 @@ public class Main {
 
         try {
             Repository repo = vcm.getRepository(repoName);
+            int initialFileCount = repo.getFiles().size();
+
             repo.scanExistingTextFiles();
-            System.out.println("Репозиторий просканирован на наличие .txt файлов.");
+
+            int newFileCount = repo.getFiles().size();
+            int addedFiles = newFileCount - initialFileCount;
+
+            System.out.println("✓ Репозиторий просканирован на наличие .txt файлов.");
+            if (addedFiles > 0) {
+                System.out.println("✓ Добавлено файлов: " + addedFiles);
+            } else {
+                System.out.println("✓ Новых .txt файлов не обнаружено.");
+            }
+
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 
@@ -423,10 +485,19 @@ public class Main {
         }
 
         try {
-            vcm.deleteRepository(name);
-            System.out.println("Репозиторий удален: " + name);
+            // Подтверждение удаления
+            System.out.print("Вы уверены, что хотите удалить репозиторий '" + name + "'? (да/нет): ");
+            String confirmation = scanner.nextLine().trim().toLowerCase();
+
+            if (confirmation.equals("да") || confirmation.equals("д")) {
+                vcm.deleteRepository(name);
+                System.out.println("✓ Репозиторий удален: " + name);
+            } else {
+                System.out.println("Удаление отменено.");
+            }
+
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("✗ Ошибка: " + e.getMessage());
         }
     }
 }

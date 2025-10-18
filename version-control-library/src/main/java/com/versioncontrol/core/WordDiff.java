@@ -26,13 +26,18 @@ public class WordDiff {
     public String toString() {
         switch (changeType) {
             case MODIFIED:
-                return String.format("      Слово %d: \"%s\" -> \"%s\"", position, oldWord, newWord);
+                return String.format("      Слово %d: \"%s\" -> \"%s\"", position,
+                        oldWord != null ? oldWord : "",
+                        newWord != null ? newWord : "");
             case ADDED:
-                return String.format("      Слово %d: добавлено \"%s\"", position, newWord);
+                return String.format("      Слово %d: добавлено \"%s\"", position,
+                        newWord != null ? newWord : "");
             case REMOVED:
-                return String.format("      Слово %d: удалено \"%s\"", position, oldWord);
+                return String.format("      Слово %d: удалено \"%s\"", position,
+                        oldWord != null ? oldWord : "");
             default:
-                return String.format("      Слово %d: \"%s\"", position, oldWord);
+                return String.format("      Слово %d: \"%s\"", position,
+                        oldWord != null ? oldWord : "");
         }
     }
 }

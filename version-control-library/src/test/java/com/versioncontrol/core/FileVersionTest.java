@@ -7,11 +7,11 @@ class FileVersionTest {
 
     @Test
     void testFileVersionCreation() {
-        FileVersion version = new FileVersion("содержимое", 1, "комментарий");
+        FileVersion version = new FileVersion("содержимое файла", 1, "комментарий к версии");
 
-        assertEquals("содержимое", version.getContent());
+        assertEquals("содержимое файла", version.getContent());
         assertEquals(1, version.getVersionNumber());
-        assertEquals("комментарий", version.getComment());
+        assertEquals("комментарий к версии", version.getComment());
         assertNotNull(version.getTimestamp());
     }
 
@@ -24,22 +24,27 @@ class FileVersionTest {
     }
 
     @Test
-    void testFileVersionCompareWith() {
-        FileVersion v1 = new FileVersion("строка один", 1, "первая версия");
-        FileVersion v2 = new FileVersion("строка два", 2, "вторая версия");
-
-        FileDiff diff = v1.compareWith(v2);
-        assertNotNull(diff);
-        assertEquals(1, diff.getLineDiffs().size());
-        assertEquals(LineDiff.ChangeType.MODIFIED, diff.getLineDiffs().get(0).getChangeType());
-    }
-
-    @Test
     void testFileVersionToString() {
-        FileVersion version = new FileVersion("содержимое", 1, "тестовый комментарий");
+        FileVersion version = new FileVersion("тестовое содержимое", 1, "тестовый комментарий");
         String result = version.toString();
 
         assertTrue(result.contains("Версия 1"));
         assertTrue(result.contains("тестовый комментарий"));
+        assertTrue(result.matches(".*\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}:\\d{2}.*"));
+    }
+
+    @Test
+    void testMultipleFileVersions() {
+        FileVersion v1 = new FileVersion("версия 1", 1, "первая");
+        FileVersion v2 = new FileVersion("версия 2", 2, "вторая");
+        FileVersion v3 = new FileVersion("версия 3", 3, "третья");
+
+        assertEquals(1, v1.getVersionNumber());
+        assertEquals(2, v2.getVersionNumber());
+        assertEquals(3, v3.getVersionNumber());
+
+        assertEquals("версия 1", v1.getContent());
+        assertEquals("версия 2", v2.getContent());
+        assertEquals("версия 3", v3.getContent());
     }
 }

@@ -24,27 +24,36 @@ public class FileDiff {
         String[] oldLines = oldContent.split("\n", -1);
         String[] newLines = newContent.split("\n", -1);
 
-        int maxLines = Math.max(oldLines.length, newLines.length);
+        // Используем более точный алгоритм сравнения
+        int i = 0, j = 0;
+        int lineNumber = 1;
 
-        for (int i = 0; i < maxLines; i++) {
+        while (i < oldLines.length || j < newLines.length) {
             String oldLine = i < oldLines.length ? oldLines[i] : null;
-            String newLine = i < newLines.length ? newLines[i] : null;
-            int lineNumber = i + 1;
+            String newLine = j < newLines.length ? newLines[j] : null;
 
-            if (oldLine == null && newLine != null) {
-                // Добавленная строка
-                diff.addLineDiff(new LineDiff(lineNumber, null, newLine, LineDiff.ChangeType.ADDED));
+            if (oldLine != null && newLine != null && oldLine.equals(newLine)) {
+                // Неизмененная строка - пропускаем
+                diff.addLineDiff(new LineDiff(lineNumber, oldLine, newLine, LineDiff.ChangeType.UNCHANGED));
+                i++;
+                j++;
+                lineNumber++;
+            } else if (oldLine != null && newLine != null && !oldLine.equals(newLine)) {
+                // Измененная строка
+                diff.addLineDiff(new LineDiff(lineNumber, oldLine, newLine, LineDiff.ChangeType.MODIFIED));
+                i++;
+                j++;
+                lineNumber++;
             } else if (oldLine != null && newLine == null) {
                 // Удаленная строка
                 diff.addLineDiff(new LineDiff(lineNumber, oldLine, null, LineDiff.ChangeType.REMOVED));
-            } else if (oldLine != null && newLine != null) {
-                if (oldLine.equals(newLine)) {
-                    // Неизмененная строка
-                    diff.addLineDiff(new LineDiff(lineNumber, oldLine, newLine, LineDiff.ChangeType.UNCHANGED));
-                } else {
-                    // Измененная строка
-                    diff.addLineDiff(new LineDiff(lineNumber, oldLine, newLine, LineDiff.ChangeType.MODIFIED));
-                }
+                i++;
+                lineNumber++;
+            } else if (oldLine == null && newLine != null) {
+                // Добавленная строка
+                diff.addLineDiff(new LineDiff(lineNumber, null, newLine, LineDiff.ChangeType.ADDED));
+                j++;
+                lineNumber++;
             }
         }
 
@@ -56,10 +65,16 @@ public class FileDiff {
         StringBuilder sb = new StringBuilder();
         sb.append("ДЕТАЛЬНЫЕ РАЗЛИЧИЯ\n\n");
 
+        boolean hasChanges = false;
         for (LineDiff lineDiff : lineDiffs) {
             if (lineDiff.getChangeType() != LineDiff.ChangeType.UNCHANGED) {
                 sb.append(lineDiff.toString()).append("\n");
+                hasChanges = true;
             }
+        }
+
+        if (!hasChanges) {
+            sb.append("Нет различий между версиями.\n");
         }
 
         return sb.toString();

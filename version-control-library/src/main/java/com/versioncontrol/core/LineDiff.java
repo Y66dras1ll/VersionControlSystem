@@ -21,14 +21,18 @@ public class LineDiff {
         this.changeType = changeType;
         this.wordDiffs = new ArrayList<>();
 
-        if (changeType == ChangeType.MODIFIED) {
+        if (changeType == ChangeType.MODIFIED && oldLine != null && newLine != null) {
             calculateWordDiffs();
         }
     }
 
     private void calculateWordDiffs() {
-        String[] oldWords = oldLine.split("\\s+");
-        String[] newWords = newLine.split("\\s+");
+        if (oldLine == null || newLine == null) {
+            return;
+        }
+
+        String[] oldWords = oldLine.trim().split("\\s+");
+        String[] newWords = newLine.trim().split("\\s+");
 
         int maxWords = Math.max(oldWords.length, newWords.length);
 
@@ -63,7 +67,9 @@ public class LineDiff {
         switch (changeType) {
             case MODIFIED:
                 sb.append(String.format(" СТРОКА %d: Изменена строка\n", lineNumber));
-                sb.append(String.format("   Изменено: \"%s\" -> \"%s\"\n", oldLine, newLine));
+                sb.append(String.format("   Изменено: \"%s\" -> \"%s\"\n",
+                        oldLine != null ? oldLine : "",
+                        newLine != null ? newLine : ""));
                 if (!wordDiffs.isEmpty()) {
                     sb.append("   Различия в словах:\n");
                     for (WordDiff wordDiff : wordDiffs) {
@@ -75,13 +81,14 @@ public class LineDiff {
                 break;
             case ADDED:
                 sb.append(String.format(" СТРОКА %d: Добавлена строка\n", lineNumber));
-                sb.append(String.format("   Добавлено: \"%s\"\n", newLine));
+                sb.append(String.format("   Добавлено: \"%s\"\n", newLine != null ? newLine : ""));
                 break;
             case REMOVED:
                 sb.append(String.format(" СТРОКА %d: Удалена строка\n", lineNumber));
-                sb.append(String.format("   Удалено: \"%s\"\n", oldLine));
+                sb.append(String.format("   Удалено: \"%s\"\n", oldLine != null ? oldLine : ""));
                 break;
             default:
+                // UNCHANGED - не выводим
                 break;
         }
 

@@ -42,4 +42,16 @@ class WordDiffTest {
         String expected = "      Слово 1: \"слово\"";
         assertEquals(expected, wordDiff.toString());
     }
+
+    @Test
+    void testWordDiffWithNullValues() {
+        WordDiff added = new WordDiff(null, "добавленное", 1, WordDiff.ChangeType.ADDED);
+        WordDiff removed = new WordDiff("удаленное", null, 1, WordDiff.ChangeType.REMOVED);
+
+        assertNull(added.getOldWord());
+        assertEquals("добавленное", added.getNewWord());
+
+        assertEquals("удаленное", removed.getOldWord());
+        assertNull(removed.getNewWord());
+    }
 }
